@@ -1,4 +1,4 @@
-Vue.component ('cart', {
+Vue.component('cart', {
     template: `
     <div>
         <button class="btn-cart" type="button" @click="cartShown = !cartShown">Корзина</button>
@@ -9,63 +9,59 @@ Vue.component ('cart', {
         </div>
     </div>
     `,
-    data () {
+    data() {
         return {
             items: [],
             cartShown: false,
-            // url: 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/getBasket.json',
             url: '/cart',
-            // addUrl: 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/addToBasket.json',
-            addUrl: '/addToBasket',
-            // delUrl: 'https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/deleteFromBasket.json',
-            delUrl: '/deleteFromBasket'
         }
     },
     methods: {
-        addProduct (pr) {
-            this.$parent.getJson (this.addUrl)
-                .then (ans => {
-                    if (ans.result) {
-                        let find = this.items.find (item => item.id_product === pr.id_product) 
-
-                        if (find) {
-                            find.quantity++
-                        } else {
-                            this.items.push (Object.assign ({}, pr, {quantity: 1}))
-                        }
-                    }
-                })
+        addProduct(pr) {
+            let find = this.items.find(item => item.id_product === pr.id_product)
+            if (find) {
+                this.$parent.putJson('/cart/' + pr.id_product, { q: 1 })
+                    .then(() => {
+                        find.quantity++
+                    })
+            } else {
+                let p = Object.assign({}, pr, { quantity: 1 })
+                this.$parent.postJson('/cart', p)
+                    .then(() => {
+                        this.items.push(p)
+                    })
+            }
         },
-        delProduct (pr) {
-            this.$parent.getJson (this.delUrl)
-                .then (ans => {
-                    if (ans.result) {
-                        let find = this.items.find (item => item.id_product === pr.id_product) 
-
-                        if (find.quantity > 1) {
-                            find.quantity--
-                        } else {
-                            this.items.splice (this.items.indexOf (find), 1)
-                        }
-                    }
-                })
+        delProduct(pr) {
+            let find = this.items.find(item => item.id_product === pr.id_product) 
+            if (find.quantity > 1) {
+                this.$parent.putJson('/cart/' + pr.id_product, { q: -1 })
+                    .then(() => {
+                        find.quantity--
+                    })
+            } else {
+                this.$parent.deleteJson('/cart/' + pr.id_product)
+                    .then(() => {
+                        this.items.splice(this.items.indexOf(pr), 1)
+                    })
+            }
         }
     },
-    mounted () {
-        this.$parent.getJson (this.url)
-            .then (data => {
+    mounted() {
+        this.$parent.getJson(this.url)
+            .then(data => {
                 this.items = data.contents
             })
     },
     computed: {
-        getSum () {
+        getSum() {
             let sum = 0
             let qua = 0
             this.items.forEach(el => {
                 sum += el.price * el.quantity
                 qua += el.quantity
             })
-            return {sum, qua}
+            return { sum, qua }
         }
     }
 })

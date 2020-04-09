@@ -2,57 +2,92 @@
 const fs = require('fs')
 const express = require('express')
 const app = express()
+const port = 3000
+const cart = require('./cart')
 
-// app.get('/', function (req, res) {
-//   res.send('Hello World!')
-// });
 
 app.use(express.json())
-app.use("/", express.static("public"))
+app.use('/', express.static("public"))
 
-app.get("/catalog", (req, res) => {
-  fs.readFile('server/db/catalogData.json', 'utf-8', (err, data) => {
-    if(err) {
-      res.sendStatus(404, JSON.stringify({result: 0}))
-    } else {
-      res.send(data)
-    }
-  })
+app.get('/catalog', (req, res) => {
+    fs.readFile('./server/db/catalogData.json', 'utf-8', (err, data) => {
+        if (err) {
+            res.sendStatus(404, JSON.stringify({ result: 0 }))
+        } else {
+            res.send(data)
+        }
+    })
 })
 
-app.get("/cart", (req, res) => {
-  fs.readFile('server/db/getBasket.json', 'utf-8', (err, data) => {
-    if(err) {
-      res.sendStatus(404, JSON.stringify({result: 0}))
-    } else {
-      res.send(data)
-    }
-  })
+app.get('/cart', (req, res) => {
+    fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
+        if (err) {
+            res.sendStatus(404, JSON.stringify({ result: 0 }))
+        } else {
+            res.send(data)
+        }
+    })
 })
 
-app.get("/addToBasket", (req, res) => {
-  fs.readFile('server/db/addToBasket.json', 'utf-8', (err, data) => {
-    if(err) {
-      res.sendStatus(404, JSON.stringify({result: 0}))
-    } else {
-      res.send(data)
-    }
-  })
-})
+app.post('/cart', (req, res) => {
+    fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
+        if (err) {
+            res.send('{ "result": 0 }')
+        } else {
+            let newCart = cart.add(req, JSON.parse(data))
 
-app.get("/deleteFromBasket", (req, res) => {
-  fs.readFile('server/db/deleteFromBasket.json', 'utf-8', (err, data) => {
-    if(err) {
-      res.sendStatus(404, JSON.stringify({result: 0}))
-    } else {
-      res.send(data)
-    }
-  })
-})
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+                if (err) {
+                    res.send('{"result": 0}')
+                } else {
+                    res.send('{"result": 1}')
+                }
+            })
+        }
+    })
+}) 
+
+app.put('/cart/:id', (req, res) => {
+    fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
+        if (err) {
+            res.send('{ "result": 0 }')
+        } else {
+            let newCart = cart.change(req, JSON.parse(data))
+
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+                if (err) {
+                    res.send('{"result": 0}')
+                } else {
+                    res.send('{"result": 1}')
+                }
+            })
+        } 
+    })  
+}) 
+
+app.delete('/cart/:id', (req, res) => {
+    fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
+        if (err) {
+            res.send('{ "result": 0 }')
+        } else {
+            let newCart = cart.delete(req, JSON.parse(data))
+
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+                if (err) {
+                    res.send('{"result": 0}')
+                } else {
+                    res.send('{"result": 1}')
+                }
+            })
+        }
+    })
+}) 
 
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+
+app.listen(port, function () {
+    console.log(`Example app listening on port ${port}`)
 });
+
 
 
