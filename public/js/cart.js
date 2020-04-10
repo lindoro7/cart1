@@ -35,7 +35,7 @@ Vue.component('cart', {
         delProduct(pr) {
             let find = this.items.find(item => item.id_product === pr.id_product) 
             if (find.quantity > 1) {
-                this.$parent.putJson('/cart/' + pr.id_product, { q: -1 })
+                this.$parent.putJson('/cart/' + pr.id_product, { q: -1 }) 
                     .then(() => {
                         find.quantity--
                     })

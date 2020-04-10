@@ -28,7 +28,7 @@ let app = new Vue({
 
         deleteJson(url) {
             return fetch(url, {
-                method: 'DELETE',
+                method: 'DELETE', 
                 headers: {
                     "Content-Type": "application/json"
                 }

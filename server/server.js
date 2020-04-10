@@ -4,6 +4,7 @@ const express = require('express')
 const app = express()
 const port = 3000
 const cart = require('./cart')
+const logger = require('./logger')
 
 
 app.use(express.json())
@@ -34,54 +35,57 @@ app.post('/cart', (req, res) => {
         if (err) {
             res.send('{ "result": 0 }')
         } else {
-            let newCart = cart.add(req, JSON.parse(data))
+            let { newCart, name } = cart.add(req, JSON.parse(data))
 
-            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), { action: 'add', name: name }, (err, data) => {
                 if (err) {
                     res.send('{"result": 0}')
                 } else {
                     res.send('{"result": 1}')
+                    logger(name, 'add')
                 }
             })
         }
     })
-}) 
+})
 
 app.put('/cart/:id', (req, res) => {
     fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
         if (err) {
             res.send('{ "result": 0 }')
         } else {
-            let newCart = cart.change(req, JSON.parse(data))
+            let { newCart, name } = cart.change(req, JSON.parse(data))
 
-            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), { action: 'change', name: name }, (err, data) => {
                 if (err) {
                     res.send('{"result": 0}')
                 } else {
                     res.send('{"result": 1}')
+                    logger(name, 'change')
                 }
             })
-        } 
-    })  
-}) 
+        }
+    })
+})
 
 app.delete('/cart/:id', (req, res) => {
     fs.readFile('./server/db/userCart.json', 'utf-8', (err, data) => {
         if (err) {
             res.send('{ "result": 0 }')
         } else {
-            let newCart = cart.delete(req, JSON.parse(data))
+            let { newCart, name } = cart.delete(req, JSON.parse(data))
 
-            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), (err, data) => {
+            fs.writeFile('./server/db/userCart.json', JSON.stringify(newCart), { action: 'delete', name: name }, (err, data) => {
                 if (err) {
                     res.send('{"result": 0}')
                 } else {
                     res.send('{"result": 1}')
+                    logger(name, 'delete')
                 }
             })
         }
     })
-}) 
+})
 
 
 
